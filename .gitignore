@@ -1,0 +1,24 @@
+# Python / Environment
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Data and Models (Keep the cloud repo lightweight!)
+data/*
+!data/.keep
+*.csv
+*.txt 
+*.pkl
+*.model
+models/*
+!models/.keep
+
+# OS generated files
+.DS_Store
+Thumbs.db
