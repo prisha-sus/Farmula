@@ -13,7 +13,7 @@ Currently optimized for Onion pricing across major Pune district mandis (Pune, B
 
 ## 📁 Project Structure
 
-\`\`\`text
+```text
 farmula/
 │
 ├── .venv/                                # Python virtual environment
@@ -24,7 +24,7 @@ farmula/
 ├── Pune_mandi_ML_model_building.ipynb    # Model training and evaluation notebook
 ├── requirements.txt                      # Project dependencies
 └── smartmandi_dss.ipynb                  # DSS logic testing and prototyping
-\`\`\`
+```
 
 ## 🛠️ Technology Stack
 * **Machine Learning:** Python, LightGBM, Scikit-Learn, Pandas, NumPy
@@ -37,22 +37,22 @@ farmula/
 Ensure you have activated the virtual environment and installed the required packages:
 
 **For Windows:**
-\`\`\`bash
+```bash
 .venv\Scripts\activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 **For Mac/Linux:**
-\`\`\`bash
+```bash
 source .venv/bin/activate
 pip install -r requirements.txt
-\`\`\`
+```
 
 ### 2. Start the Frontend Dashboard
 Run the Streamlit application directly from the root directory:
 
-\`\`\`bash
+```bash
 streamlit run app.py
-\`\`\`
+```
 *The web dashboard will automatically open in your default browser at `http://localhost:8501`.*
 
