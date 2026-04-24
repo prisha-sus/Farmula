@@ -12,12 +12,18 @@ env/
 # Data and Models (Keep the cloud repo lightweight!)
 data/*
 !data/.keep
+!data/potato/
+data/potato/*
+!data/potato/.keep
 *.csv
 *.txt 
 *.pkl
 *.model
 models/*
 !models/.keep
+!models/potato/
+models/potato/*
+!models/potato/.keep
 
 # OS generated files
 .DS_Store
