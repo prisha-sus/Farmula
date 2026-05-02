@@ -10,9 +10,13 @@ import requests
 import holidays
 import time
 from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # You should move these to an environment variable (.env) later!
-API_KEY = "579b464db66ec23bdd000001b589021ef5ac48e4753ab87bcf3b8a43"
+API_KEY = os.getenv("DATAGOV_API_KEY")
 RESOURCE_ID = "35985678-0d79-46b4-9ed6-6f13308a1d24"
 
 import time # Add this to your imports at the top if not already there

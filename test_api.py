@@ -1,5 +1,9 @@
 import requests
 import pandas as pd
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def test_open_meteo():
     print("========================================")
@@ -39,7 +43,7 @@ def test_datagov():
     print("🧅 TESTING DATA.GOV.IN (MANDI) API")
     print("========================================")
     
-    API_KEY = "579b464db66ec23bdd000001b589021ef5ac48e4753ab87bcf3b8a43"
+    API_KEY = os.getenv("DATAGOV_API_KEY")
     RESOURCE_ID = "35985678-0d79-46b4-9ed6-6f13308a1d24"
     
     url = f"https://api.data.gov.in/resource/{RESOURCE_ID}"

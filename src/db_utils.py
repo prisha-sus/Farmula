@@ -6,21 +6,25 @@ Handles connections to the local PostgreSQL database.
 import urllib.parse
 from sqlalchemy import create_engine
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
-# Database configuration
-DB_USER = "postgres"
+# Load the variables from the .env file into the system
+load_dotenv()
 
-# We use quote_plus to safely encode any special characters (@, #, $, etc.) in your password
-raw_password = "90$7&r3$p@ss"  # <-- Put your exact password here again
+# Fetch variables securely
+DB_USER = os.getenv("DB_USER")
+raw_password = os.getenv("DB_PASSWORD")
 DB_PASSWORD = urllib.parse.quote_plus(raw_password)
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-DB_HOST = "localhost"
-DB_PORT = "5432"
-DB_NAME = "farmula_db"  # Updated to your new database name!
+# Construct the URL
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Create the SQLAlchemy Engine safely
-CONNECTION_STRING = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-engine = create_engine(CONNECTION_STRING)
+# Create the SQLAlchemy Engine
+engine = create_engine(DATABASE_URL)
 
 def test_connection():
     """Tests if Python can successfully talk to PostgreSQL."""
