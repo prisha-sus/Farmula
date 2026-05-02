@@ -1,0 +1,95 @@
+"""
+Inference Module for SmartMandi DSS.
+Handles loading LightGBM models into memory and generating batch forecasts.
+"""
+
+import os
+import pandas as pd
+import lightgbm as lgb
+from typing import Dict
+
+# Global cache to store models in memory and prevent reloading on every request
+_MODEL_CACHE: Dict[int, Dict[str, lgb.Booster]] = {}
+
+def load_models(horizon: int):
+    """
+    Loads the correct LightGBM models based on the exact filenames in the models/ folder.
+    """
+    # 1. Match the specific suffix based on the horizon
+    if horizon == 1:
+        suffix = "_ver2.txt"
+    elif horizon == 30:
+        suffix = "_smoothed.txt"
+    else:
+        suffix = ".txt"  # For 7 and 15 days
+
+    models = {}
+    quantiles = ['p10', 'p50', 'p90']
+    
+    # 2. Build the filename and load the model
+    for q in quantiles:
+        filename = f"lightgbm_onion_{horizon}day_{q}{suffix}"
+        
+        # Look inside the models/ folder
+        filepath = os.path.join(os.path.dirname(__file__), '..', 'models', filename)
+        
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"❌ Cannot find model file: {filepath}")
+            
+        models[q] = lgb.Booster(model_file=filepath)
+        
+    return models
+
+
+def generate_batch_forecasts(
+    latest_features_df: pd.DataFrame, 
+    horizon: int, 
+    model_dir: str = "models"
+) -> Dict[str, Dict[str, float]]:
+    """
+    Runs inference for all mandis in the provided dataframe.
+    
+    Args:
+        latest_features_df (pd.DataFrame): DataFrame containing the latest lagged 
+                                           and weather features for all mandis.
+        horizon (int): The forecast horizon.
+        model_dir (str): Directory containing the models.
+        
+    Returns:
+        Dictionary mapping mandi names to their forecasts.
+        Example: {'Pune': {'p10': 2100.5, 'p50': 2500.0, 'p90': 2950.0}}
+    """
+    # 1. Load the requested horizon models
+    models = load_models(horizon, model_dir)
+    
+    # 2. Ensure 'mandi_name' exists to map results back to the correct market
+    if 'mandi_name' not in latest_features_df.columns:
+        raise ValueError("Input dataframe must contain a 'mandi_name' column.")
+        
+    # 3. Prevent data leakage: Drop strictly forbidden columns if they accidentally slipped in
+    drop_cols = ['arrival_date', 'target_price', 'modal_price', 'min_price', 'max_price']
+    features_only_df = latest_features_df.drop(
+        columns=[col for col in drop_cols if col in latest_features_df.columns]
+    )
+    
+    # 4. Convert categoricals explicitly before inference (required by LightGBM)
+    categorical_cols = ['mandi_name', 'district', 'state', 'variety']
+    for col in categorical_cols:
+        if col in features_only_df.columns:
+            features_only_df[col] = features_only_df[col].astype('category')
+            
+    # 5. Generate Predictions
+    p10_preds = models['p10'].predict(features_only_df)
+    p50_preds = models['p50'].predict(features_only_df)
+    p90_preds = models['p90'].predict(features_only_df)
+    
+    # 6. Package results into a clean dictionary
+    results = {}
+    for idx, mandi in enumerate(latest_features_df['mandi_name']):
+        results[mandi] = {
+            'p10': round(float(p10_preds[idx]), 2),
+            'p50': round(float(p50_preds[idx]), 2),  # Expected Gross Price
+            'p90': round(float(p90_preds[idx]), 2)
+        }
+        
+    return results
