@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import os
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +22,7 @@ def test_open_meteo():
     }
     
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=10)
         if response.status_code == 200:
             print("✅ SUCCESS: Weather API is working perfectly!")
             data = response.json()
@@ -53,31 +54,45 @@ def test_datagov():
         'limit': 5  # Only fetch 5 records to test the connection quickly
     }
     
-    try:
-        response = requests.get(url, params=params)
-        
-        if response.status_code == 200:
-            print("✅ SUCCESS: API Key is valid and server is UP!")
-            data = response.json()
-            mandi = data['records'][0]['Market']
-            price = data['records'][0]['Modal_Price']
-            print(f"   Sample Data -> Mandi: {mandi}, Price: ₹{price}")
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            # Added a 15-second timeout safety
+            response = requests.get(url, params=params)
             
-        elif response.status_code == 502:
-            print("❌ 502 ERROR: Your code is correct, but the Government server is CURRENTLY DOWN.")
-            
-        elif response.status_code in [401, 403]:
-            print("❌ AUTH ERROR: Your API Key is invalid or expired.")
-            
-        elif response.status_code == 404:
-            print("❌ NOT FOUND: Your Resource ID is incorrect.")
-            
-        else:
-            print(f"❌ UNKNOWN ERROR: {response.status_code}")
-            print(response.text)
-            
-    except Exception as e:
-        print(f"❌ EXCEPTION: {e}")
+            if response.status_code == 200:
+                print("✅ SUCCESS: API Key is valid and server is UP!")
+                data = response.json()
+                mandi = data['records'][0]['Market']
+                price = data['records'][0]['Modal_Price']
+                print(f"   Sample Data -> Mandi: {mandi}, Price: ₹{price}")
+                break # Success, exit retry loop
+                
+            elif response.status_code == 429:
+                print(f"⚠️ 429 TOO MANY REQUESTS: Rate limit hit. Sleeping for 10 seconds (Attempt {attempt+1}/{max_retries})...")
+                time.sleep(10)
+                continue # Retry after sleeping
+                
+            elif response.status_code == 502:
+                print("❌ 502 ERROR: Your code is correct, but the Government server is CURRENTLY DOWN.")
+                break
+                
+            elif response.status_code in [401, 403]:
+                print("❌ AUTH ERROR: Your API Key is invalid or expired.")
+                break
+                
+            elif response.status_code == 404:
+                print("❌ NOT FOUND: Your Resource ID is incorrect.")
+                break
+                
+            else:
+                print(f"❌ UNKNOWN ERROR: {response.status_code}")
+                print(response.text)
+                break
+                
+        except Exception as e:
+            print(f"❌ EXCEPTION: {e}")
+            break
 
 if __name__ == "__main__":
     test_open_meteo()

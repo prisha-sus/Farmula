@@ -26,23 +26,37 @@ FEATURE_TRANSLATIONS = {
     'is_holiday': 'upcoming market holidays'
 }
 
-def generate_shap_explanation(model: lgb.Booster, feature_row: pd.DataFrame, top_n: int = 3) -> str:
+def generate_shap_explanation(model: lgb.Booster, features: pd.Series, feature_names: List[str], top_n: int = 3) -> str:
     """
     Analyzes a specific prediction using SHAP and returns a natural language explanation.
     
     Args:
         model: The trained LightGBM model (specifically the p50 gross price model).
-        feature_row: A 1-row DataFrame containing the exact features fed into the model.
+        features: A Series containing the exact features fed into the model.
+        feature_names: List of feature names corresponding to the features.
         top_n: Number of top driving factors to extract.
         
     Returns:
         A plain English string explaining the forecast.
     """
+    # Check for required categorical columns
+    required = ['mandi_name', 'district', 'state', 'variety']
+    missing = [col for col in required if col not in features.index]
+    if missing:
+        raise ValueError(f"Missing required model feature columns for SHAP: {missing}")
+    
+    # Prepare the feature DataFrame
+    feature_df = features[feature_names].to_frame().T
+    
+    # Fix model categorical features to avoid SHAP error
+    if 'categorical_feature' in model.params:
+        model.params['categorical_feature'] = []
+    
     # 1. Initialize the SHAP TreeExplainer
     explainer = shap.TreeExplainer(model)
     
     # 2. Calculate SHAP values for this specific row
-    shap_values = explainer.shap_values(feature_row)
+    shap_values = explainer.shap_values(feature_df)
     
     # For LightGBM regression, shap_values is typically a 2D array: [num_samples, num_features]
     # We take the first row since we only passed in one sample
@@ -51,9 +65,10 @@ def generate_shap_explanation(model: lgb.Booster, feature_row: pd.DataFrame, top
         row_shap_values = shap_values[0][0]
     else:
         row_shap_values = shap_values[0]
-        
-    feature_names = feature_row.columns.tolist()
     
+    # For shap.Explainer, shap_values is already the array
+    row_shap_values = shap_values
+        
     # 3. Create a list of (feature_name, shap_value) and sort by absolute magnitude
     feature_impacts = list(zip(feature_names, row_shap_values))
     feature_impacts.sort(key=lambda x: abs(x[1]), reverse=True)
