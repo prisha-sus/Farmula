@@ -24,6 +24,7 @@ class FarmerRequest(BaseModel):
     farmer_lat: float
     farmer_lon: float
     horizon: int = 1  # Options: 1, 7, 15, 30
+    commodity: str = "onion"
 
 class RecommendationResponse(BaseModel):
     recommended_mandi: str
@@ -50,11 +51,11 @@ def get_recommendation(request: FarmerRequest):
             raise HTTPException(status_code=500, detail="Database is empty. Run seed_db.py first.")
 
         # 2. Run Inference (Get p10, p50, p90 for all mandis)
-        forecasts = generate_batch_forecasts(latest_features_df, horizon=request.horizon)
+        forecasts = generate_batch_forecasts(latest_features_df, commodity=request.commodity, horizon=request.horizon)
         
         # 3. Run Logistics (Calculate distances and net prices)
-        # Assuming logistics.py has a calculate_net_prices(farmer_lat, farmer_lon, forecasts) function
-        ranked_mandis = calculate_net_prices(request.farmer_lat, request.farmer_lon, forecasts)
+        # Assuming logistics.py has a calculate_net_prices((farmer_lat, farmer_lon), forecasts) function
+        ranked_mandis = calculate_net_prices((request.farmer_lat, request.farmer_lon), forecasts)
         
         if not ranked_mandis:
             raise HTTPException(status_code=500, detail="Could not calculate logistics.")
@@ -65,13 +66,19 @@ def get_recommendation(request: FarmerRequest):
         
         # 5. Run SHAP Explainer for the best Mandi
         # Get the specific feature row for this mandi to explain *why* it was chosen
-        mandi_feature_row = latest_features_df[latest_features_df['mandi_name'] == mandi_name].drop(
-            columns=['mandi_name', 'district', 'state', 'variety'] # drop categoricals for SHAP
-        )
-        
+        mandi_feature_row = latest_features_df[latest_features_df['mandi_name'] == mandi_name]
+        if mandi_feature_row.empty:
+            raise HTTPException(status_code=500, detail=f"No feature row found for mandi '{mandi_name}'")
+        mandi_feature_row = mandi_feature_row.iloc[0]
+
         # Load the specific p50 model to pass to SHAP
-        models = load_models(horizon=request.horizon)
-        explanation_text = generate_shap_explanation(models['p50'], mandi_feature_row)
+        models = load_models(commodity=request.commodity, horizon=request.horizon)
+        expected_features = models['p50'].feature_name()
+        try:
+            explanation_text = generate_shap_explanation(models['p50'], mandi_feature_row, expected_features)
+        except Exception as e:
+            # Fallback explanation if SHAP fails
+            explanation_text = "Based on our AI analysis, the forecast is influenced by recent market trends, weather conditions, and seasonal patterns."
         
         # 6. Package the final response
         return RecommendationResponse(

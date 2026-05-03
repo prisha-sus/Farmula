@@ -11,9 +11,10 @@ from typing import Dict
 # Global cache to store models in memory and prevent reloading on every request
 _MODEL_CACHE: Dict[int, Dict[str, lgb.Booster]] = {}
 
-def load_models(horizon: int):
+def load_models(commodity: str, horizon: int):
     """
-    Loads the correct LightGBM models based on the exact filenames in the models/ folder.
+    Loads the correct LightGBM models based on the exact commodity folder and horizon.
+    Assumes naming convention: lightgbm_{commodity}_{horizon}day_{quantile}{suffix}
     """
     # 1. Match the specific suffix based on the horizon
     if horizon == 1:
@@ -26,12 +27,16 @@ def load_models(horizon: int):
     models = {}
     quantiles = ['p10', 'p50', 'p90']
     
+    # Format the commodity name to be safe (lowercase, no extra spaces)
+    safe_commodity = commodity.strip().lower()
+    
     # 2. Build the filename and load the model
     for q in quantiles:
-        filename = f"lightgbm_onion_{horizon}day_{q}{suffix}"
+        # Dynamically inject the commodity name into the filename
+        filename = f"lightgbm_{safe_commodity}_{horizon}day_{q}{suffix}"
         
-        # Look inside the models/ folder
-        filepath = os.path.join(os.path.dirname(__file__), '..', 'models', filename)
+        # Point to the specific commodity subfolder (e.g., models/onion/...)
+        filepath = os.path.join(os.path.dirname(__file__), '..', 'models', safe_commodity, filename)
         
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"❌ Cannot find model file: {filepath}")
@@ -43,6 +48,7 @@ def load_models(horizon: int):
 
 def generate_batch_forecasts(
     latest_features_df: pd.DataFrame, 
+    commodity: str,
     horizon: int, 
     model_dir: str = "models"
 ) -> Dict[str, Dict[str, float]]:
@@ -60,23 +66,26 @@ def generate_batch_forecasts(
         Example: {'Pune': {'p10': 2100.5, 'p50': 2500.0, 'p90': 2950.0}}
     """
     # 1. Load the requested horizon models
-    models = load_models(horizon, model_dir)
+    models = load_models(commodity, horizon)
     
     # 2. Ensure 'mandi_name' exists to map results back to the correct market
     if 'mandi_name' not in latest_features_df.columns:
         raise ValueError("Input dataframe must contain a 'mandi_name' column.")
         
     # 3. Prevent data leakage: Drop strictly forbidden columns if they accidentally slipped in
+    # But keep any columns required by the loaded model.
+    expected_features = models['p50'].feature_name()
     drop_cols = ['arrival_date', 'target_price', 'modal_price', 'min_price', 'max_price']
-    features_only_df = latest_features_df.drop(
-        columns=[col for col in drop_cols if col in latest_features_df.columns]
-    )
+    drop_candidates = [col for col in drop_cols if col in latest_features_df.columns and col not in expected_features]
+    features_only_df = latest_features_df.drop(columns=drop_candidates)
     
     # 4. Convert categoricals explicitly before inference (required by LightGBM)
     categorical_cols = ['mandi_name', 'district', 'state', 'variety']
     for col in categorical_cols:
         if col in features_only_df.columns:
             features_only_df[col] = features_only_df[col].astype('category')
+
+    features_only_df = features_only_df[expected_features]
             
     # 5. Generate Predictions
     p10_preds = models['p10'].predict(features_only_df)
