@@ -1,58 +1,109 @@
-# Farmula: AI-Based Market Intelligence & Decision Support System
+# Farmula DSS
 
-Farmula is an AI-powered Decision Support System (DSS) designed to help farmers and Farmer Producer Organizations (FPOs) in Maharashtra make data-driven crop marketing decisions. 
+Farmula is an AI-powered Decision Support System that helps farmers and Farmer Producer Organizations (FPOs) make better pricing decisions for onions. It combines probabilistic forecasting, logistics-aware net-price ranking, and explainable AI.
 
-Currently optimized for Onion pricing across major Pune district mandis (Pune, Baramati, Shirur, Khed, Junnar), the system goes beyond standard price tickers by providing **distance-adjusted net-price comparisons**, probabilistic forecasting, and explainable AI insights.
+---
 
-## 🚀 Key Features
+## 🚀 What This Project Includes
 
-* **Probabilistic Price Forecasting:** Uses Quantile LightGBM models to predict prices across 4 horizons (1-day, 7-day, 15-day, and 30-day). Provides `p10`, `p50`, and `p90` bounds to capture market uncertainty.
-* **Geospatial Logistics Engine:** Calculates the Haversine distance between the farmer and nearby mandis, automatically deducting transport costs to recommend the most profitable market.
-* **Explainable AI (XAI):** Integrates SHAP (SHapley Additive exPlanations) to explain the driving factors behind the expected price in plain language.
-* **Interactive Dashboard:** A Streamlit-based web application for easy farmer interaction.
+- `api/` — FastAPI backend exposing recommendation endpoints
+- `streamlit_app/` — Streamlit dashboard for interactive farmer-facing UI
+- `src/` — Core application logic:
+  - `db_utils.py` — PostgreSQL connection and DB utilities
+  - `inference.py` — LightGBM model loading and forecast generation
+  - `logistics.py` — Distance, transport cost, and net-price ranking
+  - `explainer.py` — SHAP explanation generation
+  - `data_pipeline.py` — Feature engineering for latest mandi data
+- `models/` — Trained LightGBM onion quantile models
+- `data/` — Sample/prepared datasets and feature snapshots
 
-## 📁 Project Structure
+---
 
-```text
-farmula/
-│
-├── .venv/                                # Python virtual environment
-├── Data/                                 # Datasets (Agmarknet prices, weather)
-├── models/                               # Saved LightGBM models (.txt)
-├── .gitignore                            # Git ignore file
-├── app.py                                # Streamlit Web Dashboard application
-├── Pune_mandi_ML_model_building.ipynb    # Model training and evaluation notebook
-├── requirements.txt                      # Project dependencies
-└── smartmandi_dss.ipynb                  # DSS logic testing and prototyping
+## 🧩 Requirements
+
+- Python 3.11 or later
+- PostgreSQL database
+- Windows-compatible environment (this repo is structured for Windows paths)
+
+---
+
+## 📦 Setup
+
+### 1. Create / activate the virtual environment
+
+```powershell
+python -m venv venv
+.\venv\Scripts\activate
 ```
+### 2. Install dependencies
 
-## 🛠️ Technology Stack
-* **Machine Learning:** Python, LightGBM, Scikit-Learn, Pandas, NumPy
-* **Explainability:** SHAP
-* **Frontend Dashboard:** Streamlit
-
-## ⚙️ How to Run the Project Locally
-
-### 1. Activate the Virtual Environment and Install Dependencies
-Ensure you have activated the virtual environment and installed the required packages:
-
-**For Windows:**
-```bash
-.venv\Scripts\activate
+```powershell
 pip install -r requirements.txt
 ```
+## 🔧 Database Configuration
+The backend uses PostgreSQL via `db_utils.py`. It reads database connection details from `.env`.
 
-**For Mac/Linux:**
-```bash
-source .venv/bin/activate
-pip install -r requirements.txt
+Required `.env` variables
+Create a `.env` file in the project root with:
+
 ```
-
-### 2. Start the Frontend Dashboard
-Run the Streamlit application directly from the root directory:
-
-```bash
-streamlit run app.py
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=farmula_db
 ```
-*The web dashboard will automatically open in your default browser at `http://localhost:8501`.*
+Test the database connection
 
+```
+.\venv\Scripts\python.exe src\db_utils.py
+```
+This will run the built-in test_connection() and confirm whether PostgreSQL is reachable.
+
+---
+## 🧠 Loading Data
+The project expects a table named latest_mandi_features in PostgreSQL. This is the latest feature snapshot used by inference.
+
+If you need to refresh it, use:
+```
+.\venv\Scripts\python.exe src\seed_db.py
+```
+This script:
+- fetches market data
+- fetches weather data
+- generates features
+- writes the latest snapshot to PostgreSQL
+
+---
+## ▶️ Running the API
+Start the FastAPI server from the project root:
+```
+.\venv\Scripts\python.exe -m uvicorn api.main:app --reload
+```
+Then open:
+```
+http://127.0.0.1:8000
+```
+### API Endpoints
+- GET / — health check
+- POST /get_recommendation — get recommended mandi, net price, distance, transport cost, and explanation
+  
+### Example request body
+```
+{
+  "farmer_lat": 18.5204,
+  "farmer_lon": 73.8567,
+  "horizon": 7,
+  "commodity": "onion"
+}
+```
+---
+## 🖥️ Running the Streamlit Dashboard
+From the repo root:
+```
+.\venv\Scripts\python.exe -m streamlit run streamlit_app/app.py
+```
+This will launch the dashboard at:
+```
+http://localhost:8501
+```
