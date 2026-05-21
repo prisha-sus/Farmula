@@ -1,0 +1,40 @@
+name: Daily Mandi Data Ingestion
+
+on:
+  schedule:
+    - cron: '30 18 * * *'  # 6:30 PM UTC = 12:00 AM IST
+  workflow_dispatch:        # allows manual trigger from GitHub UI
+
+jobs:
+  fetch-and-store:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATAGOV_API_KEY: ${{ secrets.DATAGOV_API_KEY }}
+        run: python jobs/run_daily.py --db-only
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Daily ingestion failed — check API availability"
