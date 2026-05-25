@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Smoke-tests the SHAP explanation pipeline for every commodity/horizon combo.
 Run from project root: python scripts/test_shap.py

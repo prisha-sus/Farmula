@@ -1,0 +1,196 @@
+{
+  "app": {
+    "name": "Farmula",
+    "tagline": "DSS Command Center",
+    "subtitle": "AI-Powered Geographic Arbitrage"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "fullName": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordHint": "Min. 8 characters",
+    "continueWithGoogle": "Continue with Google",
+    "createNewAccount": "Create a new account",
+    "useExistingAccount": "Use an existing account",
+    "dashboardAccess": "Dashboard access",
+    "signInTitle": "Sign in",
+    "createAccountTitle": "Create account",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "secureFarmerAccounts": "Secure farmer accounts",
+    "logisticsAwareNet": "Logistics-aware net price",
+    "shapBackedAI": "SHAP-backed AI explanation",
+    "marketingTagline": "Market intelligence, route-aware pricing, and explainable decisions for Indian crop selling."
+  },
+  "nav": {
+    "overview": "Overview",
+    "parameters": "Parameters",
+    "recommendation": "Recommendation",
+    "history": "History",
+    "signOut": "Sign out"
+  },
+  "dashboard": {
+    "title": "Farmula DSS Dashboard",
+    "freshnessChecking": "Checking data",
+    "freshnessNoRecords": "No price records",
+    "freshnessUpdatedToday": "Prices updated today",
+    "freshnessFromDate": "Prices from {{date}}",
+    "freshnessStale": "Stale data: {{date}}"
+  },
+  "parameters": {
+    "title": "Plan the selling decision",
+    "eyebrow": "Market parameters",
+    "district": "District",
+    "crop": "Crop",
+    "horizon": "Selling horizon",
+    "horizonDays": "{{count}} day",
+    "horizonDays_plural": "{{count}} days",
+    "farmGps": "Farm GPS",
+    "useCurrentLocation": "Use Current Location",
+    "lockingLocation": "Locking Location",
+    "activeCoordinates": "Active farm coordinates",
+    "defaultCoordinates": "Default Pune coordinates",
+    "findBestMandi": "Find Best Mandi",
+    "runningAnalysis": "Running Market Analysis",
+    "clearResult": "Clear Result"
+  },
+  "commodities": {
+    "Onion": "Onion",
+    "Potato": "Potato",
+    "Soyabean": "Soyabean"
+  },
+  "weather": {
+    "title": "Current Weather",
+    "wind": "Wind {{speed}} km/h",
+    "unavailable": "Unavailable",
+    "noLiveData": "Open-Meteo did not return live weather"
+  },
+  "farmOverview": {
+    "eyebrow": "Live context",
+    "title": "Farm overview"
+  },
+  "bestPrice": {
+    "eyebrow": "Before optimization",
+    "title": "Best live mandi price",
+    "above": "{{amount}} above district average across {{count}} mandis.",
+    "unavailable": "Live price preview is unavailable for the selected crop."
+  },
+  "decisionFlow": {
+    "eyebrow": "Decision flow",
+    "title": "What runs behind each analysis",
+    "locate": "Locate",
+    "locateDesc": "Farm GPS establishes the transport origin.",
+    "forecast": "Forecast",
+    "forecastDesc": "LightGBM quantile models project crop prices.",
+    "deduct": "Deduct",
+    "deductDesc": "Logistics cost is subtracted per quintal.",
+    "optimize": "Optimize",
+    "optimizeDesc": "The dashboard ranks the highest net return."
+  },
+  "result": {
+    "optimalDestination": "Optimal destination",
+    "mandi": "Mandi",
+    "highestNetReturn": "Highest net return",
+    "highestNetPrice": "Highest Net Price",
+    "grossMarketRate": "Gross Market Rate",
+    "transportCost": "Transport Cost",
+    "distance": "Distance",
+    "perQtl": "/qtl"
+  },
+  "msp": {
+    "comparison": "MSP comparison: current price {{price}}/q, MSP {{msp}}/q",
+    "season": "({{season}})"
+  },
+  "tabs": {
+    "analytics": "Market Analytics",
+    "explanation": "AI Explanation",
+    "history": "Recommendation History"
+  },
+  "analytics": {
+    "priceRiskBounds": "Price risk bounds",
+    "priceBounds": "Gross price at {{mandi}} is likely between {{low}} and {{high}} per quintal.",
+    "latestPrices": "{{commodity}} latest mandi prices",
+    "noRows": "No latest mandi rows available.",
+    "market": "Market",
+    "modalPrice": "Modal price",
+    "date": "Date"
+  },
+  "explanation": {
+    "subtitle": "Generated through SHAP analysis over the LightGBM tree model."
+  },
+  "history": {
+    "eyebrow": "Recent analysis",
+    "title": "Local recommendation history",
+    "empty": "No recommendations have been generated in this browser yet.",
+    "date": "Date",
+    "crop": "Crop",
+    "horizon": "Horizon",
+    "targetMandi": "Target mandi",
+    "netEstimate": "Net estimate",
+    "horizonDaysCell": "{{count}} days"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "hindi": "हिन्दी",
+    "marathi": "मराठी"
+  },
+  "errors": {
+    "gpsNotAvailable": "GPS is not available in this browser",
+    "gpsFailed": "Could not lock GPS. The dashboard is using default Pune coordinates.",
+    "requestFailed": "Request failed"
+  },
+  "alerts": {
+    "sectionTitle": "SMS Alerts",
+    "sectionDescription": "Get price alerts on your phone in your language",
+    "phoneNumber": "Phone number",
+    "phonePlaceholder": "10-digit mobile number",
+    "alertType": "Alert type",
+    "dailyPrice": "Daily price update",
+    "priceThreshold": "Price threshold alert",
+    "harvestRecommendation": "Harvest timing alert",
+    "thresholdPrice": "Threshold price (Rs./qtl)",
+    "thresholdHint": "Alert me when price crosses this value",
+    "subscribe": "Subscribe to alerts",
+    "subscribed": "Alert active",
+    "sendTest": "Send test SMS",
+    "testSent": "Test SMS sent successfully",
+    "testFailed": "Failed to send test SMS",
+    "yourAlerts": "Your active alerts",
+    "noAlerts": "No alerts subscribed yet",
+    "delete": "Delete"
+  },
+  "harvest": {
+    "title": "Should I sell now or hold?",
+    "subtitle": "Smart timing recommendation based on price forecast",
+    "checkRecommendation": "Get recommendation",
+    "sellNow": "SELL NOW",
+    "hold": "HOLD",
+    "neutral": "NEUTRAL",
+    "sellNowReason": "Price expected to drop {{change}}% in {{horizon}} days",
+    "holdReason": "Price expected to rise {{change}}% in {{horizon}} days",
+    "neutralReason": "Price expected to stay roughly the same",
+    "todayPrice": "Today's price",
+    "futurePrice": "Forecast in {{horizon}} days",
+    "alsoSendSms": "Also send this to my phone",
+    "change": "Change"
+  },
+  "trader": {
+    "title": "Trader offer check",
+    "subtitle": "Is the trader giving you a fair price?",
+    "offerLabel": "Trader's offer (Rs./qtl)",
+    "offerPlaceholder": "Enter the trader's price",
+    "checkOffer": "Compare with mandi",
+    "verdictLower": "Trader is offering less",
+    "verdictHigher": "Trader is offering more",
+    "verdictFair": "Fair offer",
+    "youCouldEarn": "You could earn Rs.{{amount}}/qtl more at the mandi",
+    "traderHigherWarning": "Trader offer is Rs.{{amount}}/qtl above mandi average. Verify this is genuine.",
+    "fairOffer": "This matches current mandi rates ({{count}} mandis surveyed)",
+    "mandiAverage": "Mandi average",
+    "mandiRange": "Mandi range",
+    "difference": "Difference"
+  }
+}

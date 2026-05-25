@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Database Seeding Script for Farmula DSS.
 Runs the data pipeline to fetch live API data, engineer features, 

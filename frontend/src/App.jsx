@@ -2,14 +2,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
+  Bell,
   CloudSun,
   Compass,
   History,
   LineChart,
-  Loader2,
   Lock,
   LogOut,
   MapPin,
+  Menu,
   Navigation,
   RefreshCw,
   Route,
@@ -20,6 +21,7 @@ import {
   Truck,
   UserPlus,
   Wheat,
+  X,
 } from "lucide-react";
 import {
   Bar,
@@ -30,18 +32,37 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { API_BASE, apiRequest } from "./api";
+import AlertsPanel from "./components/AlertsPanel";
+import HarvestRecommendation from "./components/HarvestRecommendation";
+import LanguageSwitcher from "./components/LanguageSwitcher";
+import StyledSelect from "./components/StyledSelect";
+import TraderCompare from "./components/TraderCompare";
 
-const COMMODITIES = ["Onion", "Potato", "Soyabean"];
 const HORIZONS = [1, 7, 15, 30];
-const COMMODITY_DISTRICT = {
-  Onion: "nashik",
-  Potato: "pune",
-  Soyabean: "amravati",
-};
 const DEFAULT_LOCATION = { farmer_lat: 18.65, farmer_lon: 73.8 };
 const USER_KEY = "farmula:user";
 const HISTORY_KEY = "farmula:history";
+const DASHBOARD_PAGES = [
+  "overview",
+  "parameters",
+  "recommendation",
+  "history",
+  "harvest",
+  "trader",
+  "alerts",
+];
+
+function getDashboardPageFromHash() {
+  const hash = window.location.hash.replace("#", "");
+  return DASHBOARD_PAGES.includes(hash) ? hash : "overview";
+}
+
+function setDashboardHash(page) {
+  const nextPage = DASHBOARD_PAGES.includes(page) ? page : "overview";
+  window.history.pushState({}, "", `${window.location.pathname}${window.location.search}#${nextPage}`);
+}
 
 function formatMoney(value) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -120,6 +141,7 @@ function App() {
 }
 
 function AuthScreen({ onAuth }) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     name: "",
@@ -135,7 +157,7 @@ function AuthScreen({ onAuth }) {
     setError("");
 
     if (mode === "signup" && form.password !== form.confirm) {
-      setError("Passwords do not match");
+      setError(t("auth.passwordsDoNotMatch"));
       return;
     }
 
@@ -167,60 +189,64 @@ function AuthScreen({ onAuth }) {
         <div className="brand-mark">
           <Wheat size={28} />
         </div>
-        <h1>Farmula DSS</h1>
-        <p>Market intelligence, route-aware pricing, and explainable decisions for Indian crop selling.</p>
+        <h1>{t("app.name")} DSS</h1>
+        <p>{t("auth.marketingTagline")}</p>
         <div className="auth-highlights">
-          <span><ShieldCheck size={16} /> Secure farmer accounts</span>
-          <span><Route size={16} /> Logistics-aware net price</span>
-          <span><Sparkles size={16} /> SHAP-backed AI explanation</span>
+          <span><ShieldCheck size={16} /> {t("auth.secureFarmerAccounts")}</span>
+          <span><Route size={16} /> {t("auth.logisticsAwareNet")}</span>
+          <span><Sparkles size={16} /> {t("auth.shapBackedAI")}</span>
         </div>
       </section>
 
       <section className="auth-panel">
-        <div>
-          <p className="eyebrow">Dashboard access</p>
-          <h2>{mode === "login" ? "Sign in" : "Create account"}</h2>
+        <div className="auth-panel-header">
+          <div>
+            <p className="eyebrow">{t("auth.dashboardAccess")}</p>
+            <h2>{mode === "login" ? t("auth.signInTitle") : t("auth.createAccountTitle")}</h2>
+          </div>
+          <LanguageSwitcher />
         </div>
 
         <form onSubmit={submit} className="space-y-4">
           {mode === "signup" && (
             <Field
-              label="Full name"
+              label={t("auth.fullName")}
               value={form.name}
               onChange={(value) => setForm((next) => ({ ...next, name: value }))}
-              placeholder="Your name"
+              placeholder={t("auth.fullName")}
             />
           )}
           <Field
-            label="Email"
+            label={t("auth.email")}
             type="email"
             value={form.email}
             onChange={(value) => setForm((next) => ({ ...next, email: value }))}
             placeholder="you@example.com"
           />
           <Field
-            label="Password"
+            label={t("auth.password")}
             type="password"
             value={form.password}
             onChange={(value) => setForm((next) => ({ ...next, password: value }))}
-            placeholder={mode === "signup" ? "Min. 8 characters" : "Password"}
+            placeholder={mode === "signup" ? t("auth.passwordHint") : t("auth.password")}
           />
           {mode === "signup" && (
             <Field
-              label="Confirm password"
+              label={t("auth.confirmPassword")}
               type="password"
               value={form.confirm}
               onChange={(value) => setForm((next) => ({ ...next, confirm: value }))}
-              placeholder="Repeat password"
+              placeholder={t("auth.confirmPassword")}
             />
           )}
 
           {error && <p className="error-text">{error}</p>}
 
           <button className="primary-button" type="submit" disabled={loading}>
-            {loading ? <Loader2 className="spin" size={18} /> : mode === "login" ? <Lock size={18} /> : <UserPlus size={18} />}
-            {mode === "login" ? "Sign In" : "Create Account"}
+            {mode === "login" ? <Lock size={18} /> : <UserPlus size={18} />}
+            {mode === "login" ? t("auth.signIn") : t("auth.createAccount")}
           </button>
+          {loading ? <div className="skeleton" /> : null}
         </form>
 
         <button
@@ -231,7 +257,7 @@ function AuthScreen({ onAuth }) {
           }}
         >
           <img src="https://www.google.com/favicon.ico" alt="" />
-          Continue with Google
+          {t("auth.continueWithGoogle")}
         </button>
 
         <button
@@ -242,7 +268,7 @@ function AuthScreen({ onAuth }) {
             setMode(mode === "login" ? "signup" : "login");
           }}
         >
-          {mode === "login" ? "Create a new account" : "Use an existing account"}
+          {mode === "login" ? t("auth.createNewAccount") : t("auth.useExistingAccount")}
           <ArrowRight size={16} />
         </button>
       </section>
@@ -251,13 +277,26 @@ function AuthScreen({ onAuth }) {
 }
 
 function Dashboard({ user, onLogout }) {
-  const [commodity, setCommodity] = useState("Onion");
+  const { t } = useTranslation();
+  const [currentPage, setCurrentPage] = useState(getDashboardPageFromHash);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Dynamic district-commodity state (loaded from API)
+  const [districts, setDistricts] = useState([]);
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [commodities, setCommodities] = useState([]);
+  const [commodity, setCommodity] = useState("");        // commodity_key: lowercase + underscores
+  const [commodityHasForecast, setCommodityHasForecast] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(true);
+  const [loadingCommodities, setLoadingCommodities] = useState(false);
   const [horizon, setHorizon] = useState(7);
   const [location, setLocation] = useState(DEFAULT_LOCATION);
   const [freshness, setFreshness] = useState(null);
   const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
   const [bestPrice, setBestPrice] = useState(null);
+  const [bestPriceLoading, setBestPriceLoading] = useState(false);
   const [latestPrices, setLatestPrices] = useState([]);
+  const [latestPricesLoading, setLatestPricesLoading] = useState(false);
   const [recommendation, setRecommendation] = useState(null);
   const [msp, setMsp] = useState(null);
   const [history, setHistory] = useState(getStoredHistory);
@@ -266,7 +305,58 @@ function Dashboard({ user, onLogout }) {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const district = COMMODITY_DISTRICT[commodity];
+  // district is now driven by the dynamic selector
+  const district = selectedDistrict;
+
+  // Display name for the currently selected commodity
+  const commodityDisplayName = useMemo(() => {
+    const found = commodities.find((c) => c.commodity_key === commodity);
+    return found ? found.commodity : commodity;
+  }, [commodities, commodity]);
+
+  useEffect(() => {
+    const syncPage = () => setCurrentPage(getDashboardPageFromHash());
+    window.addEventListener("hashchange", syncPage);
+    return () => window.removeEventListener("hashchange", syncPage);
+  }, []);
+
+  // Load available districts on mount
+  useEffect(() => {
+    apiRequest("/market/districts")
+      .then((data) => {
+        setDistricts(data.districts);
+        if (data.districts.length > 0) setSelectedDistrict(data.districts[0]);
+      })
+      .catch(() => setDistricts([]))
+      .finally(() => setLoadingDistricts(false));
+  }, []);
+
+  // Load commodities whenever district changes
+  useEffect(() => {
+    if (!selectedDistrict) return;
+    setLoadingCommodities(true);
+    setCommodity("");
+    setCommodities([]);
+    setCommodityHasForecast(false);
+    apiRequest(`/market/commodities?district=${encodeURIComponent(selectedDistrict)}`)
+      .then((data) => {
+        setCommodities(data.commodities);
+        if (data.commodities.length > 0) {
+          const first = data.commodities[0];
+          setCommodity(first.commodity_key);
+          setCommodityHasForecast(first.has_forecast);
+        }
+      })
+      .catch(() => setCommodities([]))
+      .finally(() => setLoadingCommodities(false));
+  }, [selectedDistrict]);
+
+  function openPage(page) {
+    setCurrentPage(page);
+    setDashboardHash(page);
+    setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   useEffect(() => {
     apiRequest("/market/freshness").then(setFreshness).catch(() => setFreshness(null));
@@ -274,35 +364,37 @@ function Dashboard({ user, onLogout }) {
 
   useEffect(() => {
     let active = true;
+    setBestPriceLoading(true);
+    setLatestPricesLoading(true);
     apiRequest(
-      `/market/best-price?district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(
-        commodity.toLowerCase()
-      )}`
+      `/market/best-price?district=${encodeURIComponent(selectedDistrict)}&commodity=${encodeURIComponent(commodity)}`
     )
       .then((data) => active && setBestPrice(data))
-      .catch(() => active && setBestPrice(null));
+      .catch(() => active && setBestPrice(null))
+      .finally(() => active && setBestPriceLoading(false));
 
     apiRequest(
-      `/market/latest-prices?district=${encodeURIComponent(district)}&commodity=${encodeURIComponent(
-        commodity.toLowerCase()
-      )}`
+      `/market/latest-prices?district=${encodeURIComponent(selectedDistrict)}&commodity=${encodeURIComponent(commodity)}`
     )
       .then((data) => active && setLatestPrices(data.prices || []))
-      .catch(() => active && setLatestPrices([]));
+      .catch(() => active && setLatestPrices([]))
+      .finally(() => active && setLatestPricesLoading(false));
 
     return () => {
       active = false;
     };
-  }, [commodity, district]);
+  }, [commodity, selectedDistrict]);
 
   useEffect(() => {
     let active = true;
+    setWeatherLoading(true);
     apiRequest("/weather/current", {
       method: "POST",
       body: JSON.stringify(location),
     })
       .then((data) => active && setWeather(data.weather))
-      .catch(() => active && setWeather(null));
+      .catch(() => active && setWeather(null))
+      .finally(() => active && setWeatherLoading(false));
 
     return () => {
       active = false;
@@ -310,6 +402,14 @@ function Dashboard({ user, onLogout }) {
   }, [location]);
 
   async function analyzeMarket() {
+    if (!commodityHasForecast) {
+      setError(
+        `AI forecast not available for ${commodityDisplayName} in ${selectedDistrict}. ` +
+        "Select a commodity with AI forecast for full analysis."
+      );
+      return;
+    }
+
     setLoading(true);
     setError("");
     setRecommendation(null);
@@ -321,13 +421,13 @@ function Dashboard({ user, onLogout }) {
         body: JSON.stringify({
           ...location,
           horizon,
-          commodity: commodity.toLowerCase(),
+          commodity,   // already commodity_key (lowercase + underscores)
         }),
       });
       setRecommendation(data);
 
       const mspData = await apiRequest(
-        `/msp/status?commodity=${encodeURIComponent(commodity.toLowerCase())}&current_price=${encodeURIComponent(
+        `/msp/status?commodity=${encodeURIComponent(commodity)}&current_price=${encodeURIComponent(
           data.gross_price_p50
         )}`
       );
@@ -345,6 +445,7 @@ function Dashboard({ user, onLogout }) {
       setHistory(nextHistory);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
       setActiveTab("analytics");
+      openPage("recommendation");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -354,7 +455,7 @@ function Dashboard({ user, onLogout }) {
 
   function useCurrentLocation() {
     if (!navigator.geolocation) {
-      setError("GPS is not available in this browser");
+      setError(t("errors.gpsNotAvailable"));
       return;
     }
     setGpsLoading(true);
@@ -368,7 +469,7 @@ function Dashboard({ user, onLogout }) {
         setGpsLoading(false);
       },
       () => {
-        setError("Could not lock GPS. The dashboard is using default Pune coordinates.");
+        setError(t("errors.gpsFailed"));
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 12000 }
@@ -389,23 +490,393 @@ function Dashboard({ user, onLogout }) {
       ]
     : [];
 
+  const navItems = [
+    ["overview", t("nav.overview"), Target],
+    ["parameters", t("nav.parameters"), Compass],
+    ["recommendation", t("nav.recommendation"), LineChart],
+    ["history", t("nav.history"), History],
+    ["harvest", t("harvest.title"), Sparkles],
+    ["trader", t("trader.title"), ShieldCheck],
+    ["alerts", t("alerts.sectionTitle"), Bell],
+  ];
+
+  function renderPage() {
+    if (currentPage === "overview") {
+      return (
+        <>
+          <header className="hero-banner" id="overview">
+            <div className="hero-content">
+              <p className="eyebrow-light">AI-powered agricultural intelligence for Maharashtra</p>
+              <h1>{t("dashboard.title")}</h1>
+              <p className="hero-subtitle">
+                Real-time mandi prices, AI forecasts, and farmer-first decision tools
+              </p>
+              {freshness?.has_data && (
+                <div className="hero-stats">
+                  <span>
+                    <strong>{freshness.district_count}</strong> {t("hero.districts", "districts")}
+                  </span>
+                  <span>
+                    <strong>{freshness.commodity_count}</strong> {t("hero.commodities", "commodities")}
+                  </span>
+                  <span>
+                    <strong>20</strong> {t("hero.withAI", "with AI forecast")}
+                  </span>
+                </div>
+              )}
+            </div>
+            <FreshnessBadge freshness={freshness} />
+          </header>
+
+          <section className="page-hero panel">
+            <div>
+              <p className="eyebrow">{t("nav.overview")}</p>
+              <h2>{t("app.name")} DSS</h2>
+              <p className="page-copy">
+                Focus each decision in its own workspace: planning, recommendation, harvest timing,
+                trader offer checks, and SMS alerts.
+              </p>
+            </div>
+            <div className="page-actions">
+              <button className="primary-button compact-button" onClick={() => openPage("parameters")}>
+                <Compass size={18} />
+                {t("parameters.title")}
+              </button>
+              <button className="ghost-button compact-button" onClick={() => openPage("alerts")}>
+                <Bell size={18} />
+                {t("alerts.sectionTitle")}
+              </button>
+            </div>
+          </section>
+
+          <section className="feature-grid">
+            <FeatureCard
+              icon={<Compass size={20} />}
+              title={t("parameters.title")}
+              body="Set crop, horizon, and farm location before running the main mandi analysis."
+              action={t("nav.parameters")}
+              onClick={() => openPage("parameters")}
+            />
+            <FeatureCard
+              icon={<LineChart size={20} />}
+              title={t("nav.recommendation")}
+              body="View the best mandi result, price band, SHAP explanation, and MSP context in one place."
+              action={t("nav.recommendation")}
+              onClick={() => openPage("recommendation")}
+            />
+            <FeatureCard
+              icon={<Sparkles size={20} />}
+              title={t("harvest.title")}
+              body="Check whether you should sell now or hold based on the forecast for your selected crop."
+              action={t("harvest.checkRecommendation")}
+              onClick={() => openPage("harvest")}
+            />
+            <FeatureCard
+              icon={<ShieldCheck size={20} />}
+              title={t("trader.title")}
+              body="Compare a trader's quoted offer against current mandi averages and ranges."
+              action={t("trader.checkOffer")}
+              onClick={() => openPage("trader")}
+            />
+            <FeatureCard
+              icon={<Bell size={20} />}
+              title={t("alerts.sectionTitle")}
+              body="Manage SMS alerts, test message delivery, and keep subscriptions in your chosen language."
+              action={t("alerts.subscribe")}
+              onClick={() => openPage("alerts")}
+            />
+            <FeatureCard
+              icon={<History size={20} />}
+              title={t("history.title")}
+              body="Review recent recommendation runs stored in this browser."
+              action={t("nav.history")}
+              onClick={() => openPage("history")}
+            />
+          </section>
+
+          <section className="grid xl:grid-cols-[0.9fr_1.1fr] gap-5">
+            <BestPricePanel bestPrice={bestPrice} loading={bestPriceLoading} />
+            <DecisionFlow />
+          </section>
+        </>
+      );
+    }
+
+    if (currentPage === "parameters") {
+      return (
+        <>
+          <PageHeader
+            eyebrow={t("parameters.eyebrow")}
+            title={t("parameters.title")}
+            description="This page is only for setting the crop, horizon, and location before you run the core mandi recommendation."
+            badge={<FreshnessBadge freshness={freshness} />}
+          />
+
+          <section className="grid xl:grid-cols-[1.08fr_0.92fr] gap-5">
+            <div className="panel">
+              <div className="panel-heading">
+                <div>
+                  <p className="eyebrow">{t("parameters.eyebrow")}</p>
+                  <h2>{t("parameters.title")}</h2>
+                </div>
+                <button className="ghost-button" onClick={() => setRecommendation(null)}>
+                  <RefreshCw size={16} />
+                  {t("parameters.clearResult")}
+                </button>
+              </div>
+
+              <div className="control-grid">
+                {/* District selector — dynamic */}
+                <div className="field-block">
+                  <span>{t("parameters.district")}</span>
+                  {loadingDistricts ? (
+                    <div className="skeleton" style={{ height: 44 }} />
+                  ) : (
+                    <StyledSelect
+                      value={selectedDistrict}
+                      onChange={setSelectedDistrict}
+                      options={districts.map((d) => ({ value: d, label: d }))}
+                      placeholder={t("parameters.selectDistrict", "Select district")}
+                    />
+                  )}
+                </div>
+
+                {/* Commodity selector — dynamic, driven by selected district */}
+                <div className="field-block">
+                  <span>{t("parameters.crop")}</span>
+                  {loadingCommodities ? (
+                    <div className="skeleton" style={{ height: 44 }} />
+                  ) : (
+                    <StyledSelect
+                      value={commodity}
+                      onChange={(value) => {
+                        const selected = commodities.find((c) => c.commodity_key === value);
+                        setCommodity(value);
+                        setCommodityHasForecast(selected?.has_forecast ?? false);
+                      }}
+                      options={commodities.map((c) => ({
+                        value: c.commodity_key,
+                        label: c.commodity,
+                        has_forecast: c.has_forecast,
+                        records: c.records,
+                      }))}
+                      placeholder={t("parameters.selectCrop", "Select commodity")}
+                      renderOption={(opt) => (
+                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span>{opt.label}</span>
+                          <span
+                            style={{
+                              fontSize: "0.72rem",
+                              padding: "2px 6px",
+                              borderRadius: 4,
+                              background: opt.has_forecast
+                                ? "var(--theme-primarySoft)"
+                                : "var(--theme-bgSubtle)",
+                              color: opt.has_forecast
+                                ? "var(--theme-primary)"
+                                : "var(--theme-textMuted)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {opt.has_forecast ? "AI forecast" : "Live price"}
+                          </span>
+                        </span>
+                      )}
+                    />
+                  )}
+                </div>
+
+                <SelectControl
+                  label={t("parameters.horizon")}
+                  value={horizon}
+                  onChange={(value) => setHorizon(Number(value))}
+                  options={HORIZONS}
+                  format={(value) => t("parameters.horizonDays", { count: Number(value) })}
+                />
+                <div className="field-block">
+                  <span>{t("parameters.farmGps")}</span>
+                  <button className="location-button" onClick={useCurrentLocation} disabled={gpsLoading}>
+                    <Navigation size={18} />
+                    {gpsLoading ? t("parameters.lockingLocation") : t("parameters.useCurrentLocation")}
+                  </button>
+                </div>
+              </div>
+
+              <div className="location-strip">
+                <MapPin size={18} />
+                <span>
+                  {formatNumber(location.farmer_lat, 4)}, {formatNumber(location.farmer_lon, 4)}
+                </span>
+                <small>
+                  {location === DEFAULT_LOCATION
+                    ? t("parameters.defaultCoordinates")
+                    : t("parameters.activeCoordinates")}
+                </small>
+              </div>
+
+              <button className="primary-button analyze" onClick={analyzeMarket} disabled={loading}>
+                <Route size={19} />
+                {loading ? t("parameters.runningAnalysis") : t("parameters.findBestMandi")}
+              </button>
+              {loading ? <div className="skeleton" /> : null}
+            </div>
+
+            <div className="panel">
+              <div className="panel-heading">
+                <div>
+                  <p className="eyebrow">{t("farmOverview.eyebrow")}</p>
+                  <h2>{t("farmOverview.title")}</h2>
+                </div>
+                <CloudSun size={22} className="muted-icon" />
+              </div>
+              <div className="overview-grid">
+                <MapEmbed lat={location.farmer_lat} lon={location.farmer_lon} />
+                <WeatherCard weather={weather} loading={weatherLoading} />
+              </div>
+            </div>
+          </section>
+        </>
+      );
+    }
+
+    if (currentPage === "recommendation") {
+      return (
+        <>
+          <PageHeader
+            eyebrow={t("nav.recommendation")}
+            title={t("nav.recommendation")}
+            description="This page is dedicated to the main mandi recommendation result and its supporting analytics."
+            badge={<FreshnessBadge freshness={freshness} />}
+          />
+
+          {!recommendation ? (
+            <EmptyPageState
+              title="No recommendation yet"
+              body="Run the main analysis from the Parameters page and the result will appear here."
+              actionLabel={t("nav.parameters")}
+              onAction={() => openPage("parameters")}
+            />
+          ) : (
+            <>
+              <ResultHero recommendation={recommendation} />
+              <MetricGrid recommendation={recommendation} />
+              <MspBanner msp={msp} price={recommendation.gross_price_p50} />
+
+              <div className="panel">
+                <Tabs active={activeTab} onChange={setActiveTab} />
+                {activeTab === "analytics" && (
+                  <AnalyticsTab
+                    commodity={commodityDisplayName}
+                    recommendation={recommendation}
+                    chartData={chartData}
+                    interval={interval}
+                    latestPrices={latestPrices}
+                    latestPricesLoading={latestPricesLoading}
+                  />
+                )}
+                {activeTab === "explanation" && (
+                  <ExplanationTab explanation={recommendation.explanation} />
+                )}
+                {activeTab === "history" && <HistoryTab history={history} />}
+              </div>
+            </>
+          )}
+        </>
+      );
+    }
+
+    if (currentPage === "history") {
+      return (
+        <>
+          <PageHeader
+            eyebrow={t("history.eyebrow")}
+            title={t("history.title")}
+            description="This page keeps only your recent recommendation runs so you can compare decisions without other dashboard noise."
+          />
+          <section className="panel compact-history">
+            <div className="panel-heading">
+              <div>
+                <p className="eyebrow">{t("history.eyebrow")}</p>
+                <h2>{t("history.title")}</h2>
+              </div>
+            </div>
+            <HistoryTable history={history} />
+          </section>
+        </>
+      );
+    }
+
+    if (currentPage === "harvest") {
+      return (
+        <>
+          <PageHeader
+            eyebrow={t("harvest.title")}
+            title={t("harvest.title")}
+            description="Use this page only for harvest timing decisions: should you sell now or hold for a better expected price."
+          />
+          <HarvestRecommendation
+            commodity={commodity}
+            district={district}
+            horizon={horizon}
+            userEmail={user.email}
+          />
+        </>
+      );
+    }
+
+    if (currentPage === "trader") {
+      return (
+        <>
+          <PageHeader
+            eyebrow={t("trader.title")}
+            title={t("trader.title")}
+            description="Use this page to sanity-check a local trader offer against recent mandi price data."
+          />
+          <TraderCompare commodity={commodity} district={district} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <PageHeader
+          eyebrow={t("alerts.sectionTitle")}
+          title={t("alerts.sectionTitle")}
+          description="Use this page to test SMS delivery and manage active alert subscriptions in your selected language."
+        />
+        <AlertsPanel commodity={commodity} district={district} userEmail={user.email} />
+      </>
+    );
+  }
+
   return (
     <main className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-brand">
           <span><Wheat size={24} /></span>
           <div>
-            <strong>Farmula</strong>
-            <small>DSS Command Center</small>
+            <strong>{t("app.name")}</strong>
+            <small>{t("app.tagline")}</small>
           </div>
         </div>
 
         <nav className="nav-stack">
-          <a className="active" href="#overview"><Target size={17} /> Overview</a>
-          <a href="#parameters"><Compass size={17} /> Parameters</a>
-          <a href="#recommendation"><LineChart size={17} /> Recommendation</a>
-          <a href="#history"><History size={17} /> History</a>
+          {navItems.map(([page, label, Icon]) => (
+            <button
+              key={page}
+              type="button"
+              className={currentPage === page ? "active" : ""}
+              onClick={() => openPage(page)}
+            >
+              <Icon size={17} />
+              {label}
+            </button>
+          ))}
         </nav>
+
+        <div className="sidebar-extras">
+          <LanguageSwitcher />
+        </div>
 
         <div className="user-card">
           {user.picture ? <img src={user.picture} alt="" /> : <div className="avatar">{user.name?.[0] || "U"}</div>}
@@ -414,7 +885,7 @@ function Dashboard({ user, onLogout }) {
             <small>{user.email}</small>
           </div>
           <button
-            title="Sign out"
+            title={t("nav.signOut")}
             onClick={() => {
               localStorage.removeItem(USER_KEY);
               onLogout();
@@ -424,121 +895,70 @@ function Dashboard({ user, onLogout }) {
           </button>
         </div>
       </aside>
+      <button
+        type="button"
+        className={`sidebar-backdrop ${sidebarOpen ? "show" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+        aria-label="Close menu"
+      />
 
       <section className="workspace">
-        <header className="topbar" id="overview">
-          <div>
-            <p className="eyebrow">AI-powered geographic arbitrage</p>
-            <h1>Farmula DSS Dashboard</h1>
+        <div className="mobile-toolbar">
+          <button
+            type="button"
+            className="menu-toggle"
+            onClick={() => setSidebarOpen((prev) => !prev)}
+            aria-label="Open menu"
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="mobile-brand">
+            <Wheat size={16} />
+            <span>{t("app.name")}</span>
           </div>
-          <FreshnessBadge freshness={freshness} />
-        </header>
-
+        </div>
         {error && <div className="alert error">{error}</div>}
-
-        <section className="grid xl:grid-cols-[1.08fr_0.92fr] gap-5" id="parameters">
-          <div className="panel">
-            <div className="panel-heading">
-              <div>
-                <p className="eyebrow">Market parameters</p>
-                <h2>Plan the selling decision</h2>
-              </div>
-              <button className="ghost-button" onClick={() => setRecommendation(null)}>
-                <RefreshCw size={16} />
-                Clear Result
-              </button>
-            </div>
-
-            <div className="control-grid">
-              <SelectControl label="Crop" value={commodity} onChange={setCommodity} options={COMMODITIES} />
-              <SelectControl
-                label="Selling horizon"
-                value={horizon}
-                onChange={(value) => setHorizon(Number(value))}
-                options={HORIZONS}
-                format={(value) => `${value} day${Number(value) > 1 ? "s" : ""}`}
-              />
-              <div className="field-block">
-                <span>Farm GPS</span>
-                <button className="location-button" onClick={useCurrentLocation} disabled={gpsLoading}>
-                  {gpsLoading ? <Loader2 className="spin" size={18} /> : <Navigation size={18} />}
-                  {gpsLoading ? "Locking Location" : "Use Current Location"}
-                </button>
-              </div>
-            </div>
-
-            <div className="location-strip">
-              <MapPin size={18} />
-              <span>
-                {formatNumber(location.farmer_lat, 4)}, {formatNumber(location.farmer_lon, 4)}
-              </span>
-              <small>{location === DEFAULT_LOCATION ? "Default Pune coordinates" : "Active farm coordinates"}</small>
-            </div>
-
-            <button className="primary-button analyze" onClick={analyzeMarket} disabled={loading}>
-              {loading ? <Loader2 className="spin" size={19} /> : <Route size={19} />}
-              {loading ? "Running Market Analysis" : "Find Best Mandi"}
-            </button>
-          </div>
-
-          <div className="panel">
-            <div className="panel-heading">
-              <div>
-                <p className="eyebrow">Live context</p>
-                <h2>Farm overview</h2>
-              </div>
-              <CloudSun size={22} className="muted-icon" />
-            </div>
-            <div className="overview-grid">
-              <MapEmbed lat={location.farmer_lat} lon={location.farmer_lon} />
-              <WeatherCard weather={weather} />
-            </div>
-          </div>
-        </section>
-
-        {!recommendation && (
-          <section className="grid xl:grid-cols-[0.9fr_1.1fr] gap-5">
-            <BestPricePanel bestPrice={bestPrice} />
-            <DecisionFlow />
-          </section>
-        )}
-
-        {recommendation && (
-          <section className="space-y-5" id="recommendation">
-            <ResultHero recommendation={recommendation} />
-            <MetricGrid recommendation={recommendation} />
-            <MspBanner msp={msp} price={recommendation.gross_price_p50} />
-
-            <div className="panel">
-              <Tabs active={activeTab} onChange={setActiveTab} />
-              {activeTab === "analytics" && (
-                <AnalyticsTab
-                  commodity={commodity}
-                  recommendation={recommendation}
-                  chartData={chartData}
-                  interval={interval}
-                  latestPrices={latestPrices}
-                />
-              )}
-              {activeTab === "explanation" && (
-                <ExplanationTab explanation={recommendation.explanation} />
-              )}
-              {activeTab === "history" && <HistoryTab history={history} />}
-            </div>
-          </section>
-        )}
-
-        <section id="history" className="panel compact-history">
-          <div className="panel-heading">
-            <div>
-              <p className="eyebrow">Recent analysis</p>
-              <h2>Local recommendation history</h2>
-            </div>
-          </div>
-          <HistoryTable history={history} />
-        </section>
+        {renderPage()}
       </section>
     </main>
+  );
+}
+
+function PageHeader({ eyebrow, title, description, badge = null }) {
+  return (
+    <header className="topbar page-header">
+      <div>
+        <p className="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        {description ? <p className="page-copy">{description}</p> : null}
+      </div>
+      {badge}
+    </header>
+  );
+}
+
+function FeatureCard({ icon, title, body, action, onClick }) {
+  return (
+    <article className="feature-card">
+      <div className="feature-card-icon">{icon}</div>
+      <h3>{title}</h3>
+      <p>{body}</p>
+      <button type="button" className="ghost-button compact-button" onClick={onClick}>
+        {action}
+      </button>
+    </article>
+  );
+}
+
+function EmptyPageState({ title, body, actionLabel, onAction }) {
+  return (
+    <section className="panel empty-page-state">
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <button type="button" className="primary-button compact-button" onClick={onAction}>
+        {actionLabel}
+      </button>
+    </section>
   );
 }
 
@@ -561,49 +981,66 @@ function SelectControl({ label, value, onChange, options, format = (item) => ite
   return (
     <label className="field-block">
       <span>{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {format(option)}
-          </option>
-        ))}
-      </select>
+      <StyledSelect
+        value={value}
+        onChange={onChange}
+        options={options.map((option) => ({
+          value: option,
+          label: format(option),
+        }))}
+      />
     </label>
   );
 }
 
 function FreshnessBadge({ freshness }) {
+  const { t } = useTranslation();
   if (!freshness) {
-    return <span className="status-badge neutral">Checking data</span>;
+    return <span className="status-badge neutral">{t("dashboard.freshnessChecking")}</span>;
   }
   if (!freshness.has_data) {
-    return <span className="status-badge warning">No price records</span>;
+    return <span className="status-badge warning">{t("dashboard.freshnessNoRecords")}</span>;
   }
+  const coverage = freshness.district_count
+    ? ` · ${freshness.district_count}d/${freshness.commodity_count}c`
+    : "";
   if (freshness.days_ago === 0) {
-    return <span className="status-badge good">Prices updated today</span>;
+    return <span className="status-badge good">{t("dashboard.freshnessUpdatedToday")}{coverage}</span>;
   }
   if (freshness.days_ago <= 3) {
-    return <span className="status-badge neutral">Prices from {freshness.latest_date}</span>;
+    return (
+      <span className="status-badge neutral">
+        {t("dashboard.freshnessFromDate", { date: freshness.latest_date })}{coverage}
+      </span>
+    );
   }
-  return <span className="status-badge warning">Stale data: {freshness.latest_date}</span>;
+  return (
+    <span className="status-badge warning">
+      {t("dashboard.freshnessStale", { date: freshness.latest_date })}
+    </span>
+  );
 }
 
-function WeatherCard({ weather }) {
+function WeatherCard({ weather, loading }) {
+  const { t } = useTranslation();
+  if (loading) {
+    return <div className="skeleton" />;
+  }
   return (
     <div className="weather-card">
       <div>
         <ThermometerSun size={21} />
-        <span>Current Weather</span>
+        <span>{t("weather.title")}</span>
       </div>
       {weather ? (
         <>
           <strong>{weather.temperature} C</strong>
-          <small>Wind {weather.windspeed} km/h</small>
+          <small>{t("weather.wind", { speed: weather.windspeed })}</small>
         </>
       ) : (
         <>
-          <strong>Unavailable</strong>
-          <small>Open-Meteo did not return live weather</small>
+          <strong>{t("weather.unavailable")}</strong>
+          <small>{t("weather.noLiveData")}</small>
         </>
       )}
     </div>
@@ -616,49 +1053,61 @@ function MapEmbed({ lat, lon }) {
   return <iframe className="map-frame" title="Farm location map" src={src} />;
 }
 
-function BestPricePanel({ bestPrice }) {
+function BestPricePanel({ bestPrice, loading }) {
+  const { t } = useTranslation();
+  if (loading) {
+    return (
+      <section className="panel">
+        <div className="skeleton" />
+      </section>
+    );
+  }
   return (
     <section className="panel">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Before optimization</p>
-          <h2>Best live mandi price</h2>
+          <p className="eyebrow">{t("bestPrice.eyebrow")}</p>
+          <h2>{t("bestPrice.title")}</h2>
         </div>
         <BarChart3 size={22} className="muted-icon" />
       </div>
       {bestPrice?.available ? (
         <div className="best-price">
           <strong>{bestPrice.best_market}</strong>
-          <span>{formatMoney(bestPrice.best_price)}/qtl</span>
+          <span>{formatMoney(bestPrice.best_price)}{t("result.perQtl")}</span>
           <p>
-            {formatMoney(bestPrice.advantage)} above district average across {bestPrice.market_count} mandis.
+            {t("bestPrice.above", {
+              amount: formatMoney(bestPrice.advantage),
+              count: bestPrice.market_count,
+            })}
           </p>
         </div>
       ) : (
-        <p className="empty-text">Live price preview is unavailable for the selected crop.</p>
+        <p className="empty-text">{t("bestPrice.unavailable")}</p>
       )}
     </section>
   );
 }
 
 function DecisionFlow() {
+  const { t } = useTranslation();
   const steps = [
-    ["Locate", "Farm GPS establishes the transport origin."],
-    ["Forecast", "LightGBM quantile models project crop prices."],
-    ["Deduct", "Logistics cost is subtracted per quintal."],
-    ["Optimize", "The dashboard ranks the highest net return."],
+    [t("decisionFlow.locate"), t("decisionFlow.locateDesc")],
+    [t("decisionFlow.forecast"), t("decisionFlow.forecastDesc")],
+    [t("decisionFlow.deduct"), t("decisionFlow.deductDesc")],
+    [t("decisionFlow.optimize"), t("decisionFlow.optimizeDesc")],
   ];
   return (
     <section className="panel">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Decision flow</p>
-          <h2>What runs behind each analysis</h2>
+          <p className="eyebrow">{t("decisionFlow.eyebrow")}</p>
+          <h2>{t("decisionFlow.title")}</h2>
         </div>
       </div>
       <div className="flow-grid">
-        {steps.map(([title, body]) => (
-          <div className="flow-step" key={title}>
+        {steps.map(([title, body], index) => (
+          <div className="flow-step" key={index}>
             <span>{title}</span>
             <p>{body}</p>
           </div>
@@ -669,31 +1118,33 @@ function DecisionFlow() {
 }
 
 function ResultHero({ recommendation }) {
+  const { t } = useTranslation();
   return (
     <section className="result-hero">
       <div>
-        <p className="eyebrow">Optimal destination</p>
-        <h2>{recommendation.recommended_mandi} Mandi</h2>
+        <p className="eyebrow">{t("result.optimalDestination")}</p>
+        <h2>{recommendation.recommended_mandi} {t("result.mandi")}</h2>
       </div>
       <div className="result-chip">
         <Target size={18} />
-        Highest net return
+        {t("result.highestNetReturn")}
       </div>
     </section>
   );
 }
 
 function MetricGrid({ recommendation }) {
+  const { t } = useTranslation();
   const metrics = [
-    ["Highest Net Price", `${formatMoney(recommendation.net_price_p50)}/qtl`, <Sparkles size={20} />],
-    ["Gross Market Rate", `${formatMoney(recommendation.gross_price_p50)}/qtl`, <LineChart size={20} />],
-    ["Transport Cost", `${formatMoney(recommendation.transport_cost)}/qtl`, <Truck size={20} />],
-    ["Distance", `${formatNumber(recommendation.distance_km)} km`, <Route size={20} />],
+    [t("result.highestNetPrice"), `${formatMoney(recommendation.net_price_p50)}${t("result.perQtl")}`, <Sparkles size={20} />],
+    [t("result.grossMarketRate"), `${formatMoney(recommendation.gross_price_p50)}${t("result.perQtl")}`, <LineChart size={20} />],
+    [t("result.transportCost"), `${formatMoney(recommendation.transport_cost)}${t("result.perQtl")}`, <Truck size={20} />],
+    [t("result.distance"), `${formatNumber(recommendation.distance_km)} km`, <Route size={20} />],
   ];
   return (
     <section className="metric-grid">
-      {metrics.map(([label, value, icon]) => (
-        <div className="metric-card" key={label}>
+      {metrics.map(([label, value, icon], index) => (
+        <div className="metric-card" key={index}>
           <span>{icon}</span>
           <small>{label}</small>
           <strong>{value}</strong>
@@ -704,14 +1155,15 @@ function MetricGrid({ recommendation }) {
 }
 
 function MspBanner({ msp, price }) {
+  const { t } = useTranslation();
   if (!msp) return null;
   return (
     <div className={`alert ${msp.has_msp && msp.status === "below" ? "warning" : "good"}`}>
       <ShieldCheck size={18} />
       {msp.has_msp ? (
         <span>
-          MSP comparison: current price {formatMoney(price)}/q, MSP {formatMoney(msp.msp)}/q
-          {msp.season ? ` (${msp.season})` : ""}. {msp.message}
+          {t("msp.comparison", { price: formatMoney(price), msp: formatMoney(msp.msp) })}
+          {msp.season ? ` ${t("msp.season", { season: msp.season })}` : ""}. {msp.message}
         </span>
       ) : (
         <span>{msp.message}</span>
@@ -721,10 +1173,11 @@ function MspBanner({ msp, price }) {
 }
 
 function Tabs({ active, onChange }) {
+  const { t } = useTranslation();
   const tabs = [
-    ["analytics", "Market Analytics", BarChart3],
-    ["explanation", "AI Explanation", Sparkles],
-    ["history", "Recommendation History", History],
+    ["analytics", t("tabs.analytics"), BarChart3],
+    ["explanation", t("tabs.explanation"), Sparkles],
+    ["history", t("tabs.history"), History],
   ];
   return (
     <div className="tabs">
@@ -738,14 +1191,18 @@ function Tabs({ active, onChange }) {
   );
 }
 
-function AnalyticsTab({ commodity, recommendation, chartData, interval, latestPrices }) {
+function AnalyticsTab({ commodity, recommendation, chartData, interval, latestPrices, latestPricesLoading }) {
+  const { t } = useTranslation();
   return (
     <div className="tab-content analytics-grid">
       <div>
-        <h3>Price risk bounds</h3>
+        <h3>{t("analytics.priceRiskBounds")}</h3>
         <p>
-          Gross price at {recommendation.recommended_mandi} is likely between {formatMoney(interval.low)} and{" "}
-          {formatMoney(interval.high)} per quintal.
+          {t("analytics.priceBounds", {
+            mandi: recommendation.recommended_mandi,
+            low: formatMoney(interval.low),
+            high: formatMoney(interval.high),
+          })}
         </p>
         <div className="chart-box">
           <ResponsiveContainer width="100%" height={260}>
@@ -762,19 +1219,20 @@ function AnalyticsTab({ commodity, recommendation, chartData, interval, latestPr
       </div>
 
       <div>
-        <h3>{commodity} latest mandi prices</h3>
-        <PriceTable prices={latestPrices} />
+        <h3>{t("analytics.latestPrices", { commodity })}</h3>
+        {latestPricesLoading ? <div className="skeleton" /> : <PriceTable prices={latestPrices} />}
       </div>
     </div>
   );
 }
 
 function ExplanationTab({ explanation }) {
+  const { t } = useTranslation();
   return (
     <div className="tab-content explanation">
       <Sparkles size={22} />
       <p>{explanation}</p>
-      <small>Generated through SHAP analysis over the LightGBM tree model.</small>
+      <small>{t("explanation.subtitle")}</small>
     </div>
   );
 }
@@ -788,17 +1246,18 @@ function HistoryTab({ history }) {
 }
 
 function PriceTable({ prices }) {
+  const { t } = useTranslation();
   if (!prices.length) {
-    return <p className="empty-text">No latest mandi rows available.</p>;
+    return <p className="empty-text">{t("analytics.noRows")}</p>;
   }
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Market</th>
-            <th>Modal price</th>
-            <th>Date</th>
+            <th>{t("analytics.market")}</th>
+            <th>{t("analytics.modalPrice")}</th>
+            <th>{t("analytics.date")}</th>
           </tr>
         </thead>
         <tbody>
@@ -816,19 +1275,20 @@ function PriceTable({ prices }) {
 }
 
 function HistoryTable({ history }) {
+  const { t } = useTranslation();
   if (!history.length) {
-    return <p className="empty-text">No recommendations have been generated in this browser yet.</p>;
+    return <p className="empty-text">{t("history.empty")}</p>;
   }
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Crop</th>
-            <th>Horizon</th>
-            <th>Target mandi</th>
-            <th>Net estimate</th>
+            <th>{t("history.date")}</th>
+            <th>{t("history.crop")}</th>
+            <th>{t("history.horizon")}</th>
+            <th>{t("history.targetMandi")}</th>
+            <th>{t("history.netEstimate")}</th>
           </tr>
         </thead>
         <tbody>
@@ -836,7 +1296,7 @@ function HistoryTable({ history }) {
             <tr key={row.id}>
               <td>{new Date(row.date).toLocaleDateString("en-IN")}</td>
               <td>{row.crop}</td>
-              <td>{row.horizon} days</td>
+              <td>{t("history.horizonDaysCell", { count: row.horizon })}</td>
               <td>{row.mandi}</td>
               <td>{formatMoney(row.net)}</td>
             </tr>

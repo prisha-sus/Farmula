@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 seed_from_csv.py
 Populates latest_mandi_features from local Agmarknet CSV files + Open-Meteo weather.

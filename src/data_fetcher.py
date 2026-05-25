@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 data_fetcher.py
 Fetches today's Maharashtra mandi price data from data.gov.in and returns

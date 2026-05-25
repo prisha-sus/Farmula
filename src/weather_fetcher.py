@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 weather_fetcher.py
 Thin wrapper around the Open-Meteo historical archive API.

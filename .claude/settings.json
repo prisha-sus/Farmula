@@ -39,7 +39,14 @@
       "PowerShell($fe = Invoke-WebRequest \"http://127.0.0.1:5173/\" -TimeoutSec 6 -UseBasicParsing; \"Frontend status: $\\($fe.StatusCode\\)\")",
       "PowerShell(New-Item -ItemType Directory -Path \"d:\\\\Farmula-main\\\\streamlit_app\\\\pages\" -Force)",
       "PowerShell(Head 30)",
-      "PowerShell(cmd /c \"dir /a D:\\\\Farmula-main\")"
+      "PowerShell(cmd /c \"dir /a D:\\\\Farmula-main\")",
+      "PowerShell(cmd /c \"dir /b /s D:\\\\Farmula-main\\\\frontend\\\\src\\\\components\\\\ 2>nul && dir /b /s D:\\\\Farmula-main\\\\frontend\\\\src\\\\theme\\\\ 2>nul && dir /b /s D:\\\\Farmula-main\\\\frontend\\\\src\\\\ThemePreview.jsx 2>nul && dir /b /s D:\\\\Farmula-main\\\\frontend\\\\public\\\\ 2>nul && dir /b D:\\\\Farmula-main\\\\scripts\\\\audit_features.py 2>nul\")",
+      "PowerShell(cmd /c \"dir /b D:\\\\Farmula-main\\\\data\\\\ 2>nul\")",
+      "PowerShell(cmd /c \"dir /b D:\\\\Farmula-main\\\\data\\\\analysis\\\\\")",
+      "PowerShell(Set-Location \"D:\\\\Farmula-main\"; $env:PYTHONIOENCODING=\"utf-8\"; python scripts/bulk_train.py 2>&1)",
+      "Bash(PYTHONIOENCODING=utf-8 python scripts/bulk_train.py)",
+      "PowerShell(Stop-Process -Id 13152 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 16244 -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }

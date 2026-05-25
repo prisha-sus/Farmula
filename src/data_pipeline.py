@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Data Pipeline Module for SmartMandi DSS.
 Fetches live data from data.gov.in and Open-Meteo, engineers features, 

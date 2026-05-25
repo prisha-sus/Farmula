@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 MSP (Minimum Support Price) reference data for supported commodities.
 Source: Cabinet approvals, Government of India.

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Database Utility Module for Farmula DSS.
 Handles connections to the local PostgreSQL database.

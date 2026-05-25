@@ -1,5 +1,5 @@
 export const API_BASE =
-  import.meta.env.VITE_FASTAPI_URL || "http://127.0.0.1:8000";
+  import.meta.env.VITE_FASTAPI_URL || "http://127.0.0.1:8006";
 
 export async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
