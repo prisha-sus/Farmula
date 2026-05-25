@@ -1,0 +1,196 @@
+{
+  "app": {
+    "name": "फार्मुला",
+    "tagline": "डीएसएस कमांड सेंटर",
+    "subtitle": "एआय-चालित भौगोलिक आर्बिट्राज"
+  },
+  "auth": {
+    "signIn": "साइन इन करा",
+    "createAccount": "खाते तयार करा",
+    "fullName": "पूर्ण नाव",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्डची पुष्टी करा",
+    "passwordHint": "किमान 8 अक्षरे",
+    "continueWithGoogle": "Google सह सुरू ठेवा",
+    "createNewAccount": "नवीन खाते तयार करा",
+    "useExistingAccount": "विद्यमान खाते वापरा",
+    "dashboardAccess": "डॅशबोर्ड प्रवेश",
+    "signInTitle": "साइन इन",
+    "createAccountTitle": "खाते तयार करा",
+    "passwordsDoNotMatch": "पासवर्ड जुळत नाहीत",
+    "secureFarmerAccounts": "सुरक्षित शेतकरी खाती",
+    "logisticsAwareNet": "लॉजिस्टिक्स-जागरूक निव्वळ किंमत",
+    "shapBackedAI": "SHAP-समर्थित एआय स्पष्टीकरण",
+    "marketingTagline": "भारतीय पीक विक्रीसाठी बाजार बुद्धिमत्ता, मार्ग-जागरूक किंमत आणि स्पष्ट निर्णय."
+  },
+  "nav": {
+    "overview": "विहंगावलोकन",
+    "parameters": "पॅरामीटर्स",
+    "recommendation": "शिफारस",
+    "history": "इतिहास",
+    "signOut": "साइन आउट"
+  },
+  "dashboard": {
+    "title": "फार्मुला डीएसएस डॅशबोर्ड",
+    "freshnessChecking": "डेटा तपासत आहे",
+    "freshnessNoRecords": "कोणतेही किंमत रेकॉर्ड नाहीत",
+    "freshnessUpdatedToday": "आजच्या किमती अद्यतनित",
+    "freshnessFromDate": "{{date}} च्या किमती",
+    "freshnessStale": "जुना डेटा: {{date}}"
+  },
+  "parameters": {
+    "title": "विक्री निर्णयाची योजना करा",
+    "eyebrow": "बाजार पॅरामीटर्स",
+    "district": "जिल्हा",
+    "crop": "पीक",
+    "horizon": "विक्री कालावधी",
+    "horizonDays": "{{count}} दिवस",
+    "horizonDays_plural": "{{count}} दिवस",
+    "farmGps": "शेताचे जीपीएस",
+    "useCurrentLocation": "सध्याचे स्थान वापरा",
+    "lockingLocation": "स्थान लॉक करत आहे",
+    "activeCoordinates": "सक्रिय शेत निर्देशांक",
+    "defaultCoordinates": "डीफॉल्ट पुणे निर्देशांक",
+    "findBestMandi": "सर्वोत्तम मंडी शोधा",
+    "runningAnalysis": "बाजार विश्लेषण चालू आहे",
+    "clearResult": "निकाल साफ करा"
+  },
+  "commodities": {
+    "Onion": "कांदा",
+    "Potato": "बटाटा",
+    "Soyabean": "सोयाबीन"
+  },
+  "weather": {
+    "title": "सध्याचे हवामान",
+    "wind": "वारा {{speed}} किमी/तास",
+    "unavailable": "उपलब्ध नाही",
+    "noLiveData": "Open-Meteo ने लाइव्ह हवामान परत केले नाही"
+  },
+  "farmOverview": {
+    "eyebrow": "लाइव्ह संदर्भ",
+    "title": "शेत विहंगावलोकन"
+  },
+  "bestPrice": {
+    "eyebrow": "ऑप्टिमायझेशनपूर्वी",
+    "title": "सर्वोत्तम लाइव्ह मंडी किंमत",
+    "above": "{{count}} मंड्यांमध्ये जिल्हा सरासरीपेक्षा {{amount}} जास्त.",
+    "unavailable": "निवडलेल्या पिकासाठी लाइव्ह किंमत पूर्वावलोकन उपलब्ध नाही."
+  },
+  "decisionFlow": {
+    "eyebrow": "निर्णय प्रवाह",
+    "title": "प्रत्येक विश्लेषणामागे काय चालते",
+    "locate": "स्थान",
+    "locateDesc": "शेताचे जीपीएस वाहतुकीचे मूळ स्थापित करते.",
+    "forecast": "अंदाज",
+    "forecastDesc": "LightGBM क्वांटाइल मॉडेल पीक किमतींचा अंदाज लावतात.",
+    "deduct": "वजा करा",
+    "deductDesc": "प्रति क्विंटल लॉजिस्टिक्स खर्च वजा केला जातो.",
+    "optimize": "ऑप्टिमाइझ",
+    "optimizeDesc": "डॅशबोर्ड सर्वोच्च निव्वळ परतावा रँक करते."
+  },
+  "result": {
+    "optimalDestination": "इष्टतम गंतव्य",
+    "mandi": "मंडी",
+    "highestNetReturn": "सर्वोच्च निव्वळ परतावा",
+    "highestNetPrice": "सर्वोच्च निव्वळ किंमत",
+    "grossMarketRate": "एकूण बाजार दर",
+    "transportCost": "वाहतूक खर्च",
+    "distance": "अंतर",
+    "perQtl": "/क्विंटल"
+  },
+  "msp": {
+    "comparison": "एमएसपी तुलना: सध्याची किंमत {{price}}/क्विं, एमएसपी {{msp}}/क्विं",
+    "season": "({{season}})"
+  },
+  "tabs": {
+    "analytics": "बाजार विश्लेषण",
+    "explanation": "एआय स्पष्टीकरण",
+    "history": "शिफारस इतिहास"
+  },
+  "analytics": {
+    "priceRiskBounds": "किंमत जोखीम मर्यादा",
+    "priceBounds": "{{mandi}} मधील एकूण किंमत प्रति क्विंटल {{low}} आणि {{high}} दरम्यान असण्याची शक्यता आहे.",
+    "latestPrices": "{{commodity}} नवीनतम मंडी किमती",
+    "noRows": "कोणत्याही नवीनतम मंडी ओळी उपलब्ध नाहीत.",
+    "market": "बाजार",
+    "modalPrice": "मोडल किंमत",
+    "date": "दिनांक"
+  },
+  "explanation": {
+    "subtitle": "LightGBM ट्री मॉडेलवर SHAP विश्लेषणाद्वारे तयार केले."
+  },
+  "history": {
+    "eyebrow": "अलीकडील विश्लेषण",
+    "title": "स्थानिक शिफारस इतिहास",
+    "empty": "या ब्राउझरमध्ये अद्याप कोणत्याही शिफारसी तयार झालेल्या नाहीत.",
+    "date": "दिनांक",
+    "crop": "पीक",
+    "horizon": "कालावधी",
+    "targetMandi": "लक्ष्य मंडी",
+    "netEstimate": "निव्वळ अंदाज",
+    "horizonDaysCell": "{{count}} दिवस"
+  },
+  "language": {
+    "label": "भाषा",
+    "english": "English",
+    "hindi": "हिन्दी",
+    "marathi": "मराठी"
+  },
+  "errors": {
+    "gpsNotAvailable": "या ब्राउझरमध्ये जीपीएस उपलब्ध नाही",
+    "gpsFailed": "जीपीएस लॉक होऊ शकले नाही. डॅशबोर्ड डीफॉल्ट पुणे निर्देशांक वापरत आहे.",
+    "requestFailed": "विनंती अयशस्वी"
+  },
+  "alerts": {
+    "sectionTitle": "SMS अलर्ट",
+    "sectionDescription": "तुमच्या भाषेत फोनवर किंमत अलर्ट मिळवा",
+    "phoneNumber": "फोन नंबर",
+    "phonePlaceholder": "10 अंकी मोबाइल नंबर",
+    "alertType": "अलर्ट प्रकार",
+    "dailyPrice": "दैनिक किंमत अपडेट",
+    "priceThreshold": "किंमत मर्यादा अलर्ट",
+    "harvestRecommendation": "कापणी वेळ अलर्ट",
+    "thresholdPrice": "मर्यादा किंमत (रु./क्विं)",
+    "thresholdHint": "ही किंमत ओलांडल्यावर मला कळवा",
+    "subscribe": "अलर्ट सब्सक्राइब करा",
+    "subscribed": "अलर्ट सक्रिय",
+    "sendTest": "चाचणी SMS पाठवा",
+    "testSent": "चाचणी SMS यशस्वीरित्या पाठवला",
+    "testFailed": "चाचणी SMS पाठवण्यात अयशस्वी",
+    "yourAlerts": "तुमचे सक्रिय अलर्ट",
+    "noAlerts": "अद्याप कोणतेही अलर्ट सब्सक्राइब केलेले नाहीत",
+    "delete": "हटवा"
+  },
+  "harvest": {
+    "title": "आता विकू की थांबू?",
+    "subtitle": "किंमत अंदाजावर आधारित स्मार्ट सल्ला",
+    "checkRecommendation": "शिफारस मिळवा",
+    "sellNow": "आता विका",
+    "hold": "थांबा",
+    "neutral": "तटस्थ",
+    "sellNowReason": "{{horizon}} दिवसांत किंमत {{change}}% कमी होण्याची शक्यता",
+    "holdReason": "{{horizon}} दिवसांत किंमत {{change}}% वाढण्याची शक्यता",
+    "neutralReason": "किंमत साधारणपणे तशीच राहण्याची शक्यता",
+    "todayPrice": "आजची किंमत",
+    "futurePrice": "{{horizon}} दिवसांतील अंदाज",
+    "alsoSendSms": "हे माझ्या फोनवर देखील पाठवा",
+    "change": "फरक"
+  },
+  "trader": {
+    "title": "व्यापारी ऑफर तपासणी",
+    "subtitle": "व्यापारी तुम्हाला योग्य किंमत देत आहे का?",
+    "offerLabel": "व्यापाऱ्याची ऑफर (रु./क्विं)",
+    "offerPlaceholder": "व्यापाऱ्याची किंमत प्रविष्ट करा",
+    "checkOffer": "मंडईशी तुलना करा",
+    "verdictLower": "व्यापारी कमी देत आहे",
+    "verdictHigher": "व्यापारी जास्त देत आहे",
+    "verdictFair": "योग्य ऑफर",
+    "youCouldEarn": "तुम्ही मंडईत रु.{{amount}}/क्विं अधिक कमवू शकता",
+    "traderHigherWarning": "व्यापाऱ्याची ऑफर मंडई सरासरीपेक्षा रु.{{amount}}/क्विं जास्त आहे. ही खरी आहे का ते तपासा.",
+    "fairOffer": "हे सध्याच्या मंडई दरांशी जुळते ({{count}} मंड्यांचे सर्वेक्षण)",
+    "mandiAverage": "मंडई सरासरी",
+    "mandiRange": "मंडई श्रेणी",
+    "difference": "फरक"
+  }
+}

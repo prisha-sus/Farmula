@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Inference Module for SmartMandi DSS.
 Handles loading LightGBM models into memory and generating batch forecasts.
@@ -10,6 +11,13 @@ from typing import Dict
 
 # Global cache to store models in memory and prevent reloading on every request
 _MODEL_CACHE: Dict[int, Dict[str, lgb.Booster]] = {}
+
+WEATHER_LAG_COLS = [
+    'temp_lag1', 'temp_lag7', 'precip_lag1',
+    'precip_roll7', 'precip_roll30', 'evapotrans_lag1',
+    'temp_mean', 'temp_max', 'temp_min',
+    'precipitation', 'evapotranspiration'
+]
 
 def load_models(commodity: str, horizon: int):
     """
@@ -78,7 +86,13 @@ def generate_batch_forecasts(
     drop_cols = ['arrival_date', 'target_price', 'modal_price', 'min_price', 'max_price']
     drop_candidates = [col for col in drop_cols if col in latest_features_df.columns and col not in expected_features]
     features_only_df = latest_features_df.drop(columns=drop_candidates)
-    
+
+    # Fill any missing weather lag columns with 0.0 so inference never crashes
+    # when the DB table was built without weather features.
+    for col in WEATHER_LAG_COLS:
+        if col not in features_only_df.columns:
+            features_only_df[col] = 0.0
+
     # 4. Convert categoricals explicitly before inference (required by LightGBM)
     categorical_cols = ['mandi_name', 'district', 'state', 'variety']
     for col in categorical_cols:

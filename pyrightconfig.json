@@ -1,0 +1,5 @@
+{
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "pythonVersion": "3.11"
+}

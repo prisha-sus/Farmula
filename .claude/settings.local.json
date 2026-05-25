@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import streamlit_google_auth; import os; print\\(os.path.dirname\\(streamlit_google_auth.__file__\\)\\)\")",
+      "Read(//c/Users/Ankit/AppData/Local/Programs/Python/Python311/Lib/site-packages/streamlit_google_auth/**)",
+      "Bash(streamlit run *)",
+      "Bash(curl -s http://localhost:8501/healthz)"
+    ]
+  }
+}

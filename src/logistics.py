@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Logistics Module for SmartMandi DSS.
 Calculates geospatial distances and transport costs to determine the best net price.
